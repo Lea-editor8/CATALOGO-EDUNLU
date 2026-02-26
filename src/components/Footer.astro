@@ -1,0 +1,56 @@
+---
+
+---
+
+<footer class="bg-gray-800 text-white py-12 border-t border-gray-700 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div class="text-center md:text-left">
+                <h2 class="text-xl font-bold tracking-tight">EdUNLu</h2>
+                <p class="text-gray-400 text-sm mt-2">
+                    Editorial de la Universidad Nacional de Luján
+                </p>
+            </div>
+
+            <div class="flex justify-center gap-6">
+                <a
+                    href="https://www.edunlu.unlu.edu.ar/"
+                    target="_blank"
+                    class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 text-sm"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                        ></path>
+                    </svg>
+                    Visitar Web Oficial
+                </a>
+            </div>
+
+            <div class="text-center md:text-right">
+                <p class="text-sm text-gray-400">
+                    &copy; <span id="footer-year"></span> EdUNLu.
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    Luján, Buenos Aires, Argentina
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const yearElement = document.getElementById("footer-year");
+    if (yearElement) {
+        yearElement.textContent = new Date().getFullYear().toString();
+    }
+</script>

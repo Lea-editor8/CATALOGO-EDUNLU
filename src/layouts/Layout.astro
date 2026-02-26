@@ -1,23 +1,82 @@
+---
+import "@styles/global.css";
+import Header from "@components/Header.astro";
+import Footer from "@components/Footer.astro";
+import { books, type Book } from "@data/products";
+
+const collections = Array.from(
+	new Set(
+		books.map((b: Book) => b.collection).filter((c: string) => c !== ""),
+	),
+);
+
+const allCategories = Array.from(
+	new Set(books.flatMap((b: Book) => b.category)),
+).sort();
+---
+
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>
+			Catálogo de Publicaciones | EdUNLu - Editorial Universidad Nacional
+			de Luján
+		</title>
+		<meta
+			name="description"
+			content="Explorá el catálogo completo de publicaciones de la Editorial de la Universidad Nacional de Luján (EdUNLu). Buscá y filtrá libros por colección, categoría, título o autor. Encontrá publicaciones académicas, revistas y más."
+		/>
+		<meta
+			name="keywords"
+			content="EdUNLu, Editorial UNLu, Universidad Nacional de Luján, catálogo de libros, publicaciones académicas, revistas universitarias, libros académicos Argentina, buscar libros, filtro de publicaciones, editorial universitaria"
+		/>
+		<meta
+			name="author"
+			content="Editorial de la Universidad Nacional de Luján (EdUNLu)"
+		/>
+		<meta name="robots" content="index, follow" />
+
+		<!-- Open Graph -->
+		<meta
+			property="og:title"
+			content="Catálogo de Publicaciones | EdUNLu - Editorial UNLu"
+		/>
+		<meta property="og:url" content="" />
+		<meta
+			property="og:description"
+			content="Explorá el catálogo completo de libros y publicaciones de la Editorial de la Universidad Nacional de Luján. Filtrá por colección, categoría y más."
+		/>
+		<meta property="og:image" content="" />
+		<meta property="og:type" content="website" />
+		<meta property="og:locale" content="es_AR" />
+		<meta
+			property="og:site_name"
+			content="EdUNLu - Editorial Universidad Nacional de Luján"
+		/>
+
+		<!-- Twitter / X -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta property="twitter:domain" content="edunlu.unlu.edu.ar" />
+		<meta property="twitter:url" content="" />
+		<meta
+			name="twitter:title"
+			content="Catálogo de Publicaciones | EdUNLu"
+		/>
+		<meta
+			name="twitter:description"
+			content="Catálogo completo de libros y publicaciones de la Editorial de la Universidad Nacional de Luján."
+		/>
+		<meta name="twitter:image" content="" />
+		<meta name="twitter:creator" content="@edunlu" />
 	</head>
 	<body>
-		<slot />
+		<Header collections={collections} allCategories={allCategories} />
+		<main>
+			<slot />
+		</main>
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

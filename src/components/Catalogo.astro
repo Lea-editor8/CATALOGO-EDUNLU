@@ -1,0 +1,309 @@
+---
+import { books, type Book } from "@data/products";
+import Image from "astro/components/Image.astro";
+
+const images = import.meta.glob<{ default: ImageMetadata }>(
+    "/src/assets/imagenes/libros/*.{jpeg,jpg,png,gif,webp}",
+    { eager: true },
+);
+
+const booksForJs = books.map((b: Book) => {
+    const imagePath = `/src/assets/imagenes/libros/${b.coverImage}`;
+    return {
+        ...b,
+        coverImage: images[imagePath] ? images[imagePath].default.src : "",
+    };
+});
+---
+
+<section id="catalogo" class="min-h-screen flex flex-col bg-gray-50 pt-6">
+    <div id="libraryMessage" class="max-w-7xl mx-auto px-4 py-2 w-full"></div>
+
+    <div
+        id="book-grid"
+        data-books={JSON.stringify(booksForJs)}
+        class="flex-1 w-full max-w-full mx-auto grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 p-4 content-start"
+    >
+        {
+            books.map((book: Book) => (
+                <article
+                    class="group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer"
+                    data-id={book.id}
+                    data-title={book.title.toLowerCase()}
+                    data-author={book.author.toLowerCase()}
+                    data-collection={book.collection}
+                    data-categories={JSON.stringify(book.category)}
+                >
+                    <div class="aspect-[3/4] overflow-hidden bg-gray-100 flex items-center justify-center p-2">
+                        <Image
+                            src={
+                                images[
+                                    `/src/assets/imagenes/libros/${book.coverImage}`
+                                ]?.default
+                            }
+                            alt={book.title}
+                            width={200}
+                            height={267}
+                            class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        />
+                    </div>
+                    <div class="p-3 flex flex-col flex-1 gap-2">
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">
+                                {book.title}
+                            </h3>
+                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">
+                                {book.author}
+                            </p>
+                        </div>
+                        <div class="mt-2">
+                            <button class="w-full py-1.5 px-3 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-1">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-3 w-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
+                                </svg>
+                                Ver
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            ))
+        }
+    </div>
+
+    <p id="emptyLibraryMessage" class="text-center text-gray-500 hidden p-8">
+        No se encontraron libros.
+    </p>
+
+    <script type="module">
+        const grid = document.getElementById("book-grid");
+        const allBooks = JSON.parse(grid.dataset.books);
+        const searchInput = document.getElementById("searchInput");
+        const collectionFilters = document.getElementById("collectionFilters");
+        const categoryFilters = document.getElementById("categoryFilters");
+        const sortAlpha = document.getElementById("sortAlpha");
+        const sortDate = document.getElementById("sortDate");
+        const resetFilters = document.getElementById("resetFilters");
+        const emptyMessage = document.getElementById("emptyLibraryMessage");
+
+        let currentCollection = "all";
+        let currentCategory = "all";
+        let currentSort = "date";
+        let searchQuery = "";
+
+        const articles = Array.from(grid.querySelectorAll("article"));
+
+        sortAlpha.classList.add("bg-gray-100", "text-gray-700");
+        sortDate.classList.remove("bg-gray-100", "text-gray-700");
+        sortDate.classList.add("bg-green-600", "text-white");
+
+        function filterAndSort() {
+            let filtered = [...allBooks];
+
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                filtered = filtered.filter(
+                    (b) =>
+                        b.title.toLowerCase().includes(q) ||
+                        b.author.toLowerCase().includes(q),
+                );
+            }
+
+            if (currentCollection !== "all") {
+                filtered = filtered.filter(
+                    (b) => b.collection === currentCollection,
+                );
+            }
+
+            if (currentCategory !== "all") {
+                filtered = filtered.filter((b) =>
+                    b.category.includes(currentCategory),
+                );
+            }
+
+            if (currentSort === "alpha") {
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+            } else if (currentSort === "date") {
+                filtered.sort(
+                    (a, b) => new Date(b.publishDate) - new Date(a.publishDate),
+                );
+            }
+
+            const filteredIds = new Set(filtered.map((b) => b.id));
+
+            // Reordenar físicamente en el DOM y mostrar/ocultar
+            filtered.forEach((book) => {
+                const article = articles.find((a) => a.dataset.id === book.id);
+                if (article) {
+                    grid.appendChild(article); // Al hacer appendChild de un nodo existente, se mueve de posición
+                    article.style.display = "";
+                }
+            });
+
+            // Ocultar los que no están en el filtro
+            articles.forEach((article) => {
+                if (!filteredIds.has(article.dataset.id)) {
+                    article.style.display = "none";
+                }
+            });
+
+            if (filtered.length === 0) {
+                emptyMessage.classList.remove("hidden");
+            } else {
+                emptyMessage.classList.add("hidden");
+            }
+        }
+
+        const collectionColors = {
+            Ciencias: { bg: "bg-[#E53935]", text: "text-white" },
+            "Sociedad en movimiento": {
+                bg: "bg-[#FDD835]",
+                text: "text-black",
+            },
+            Aulas: { bg: "bg-[#1976D2]", text: "text-white" },
+            "": { bg: "bg-slate-500", text: "text-white" },
+            all: { bg: "bg-green-600", text: "text-white" },
+        };
+
+        function resetAllFiltersUI() {
+            // Resetear búsqueda
+            searchQuery = "";
+            searchInput.value = "";
+
+            // Resetear colección
+            currentCollection = "all";
+            document
+                .querySelectorAll("#collectionFilters button")
+                .forEach((btn) => {
+                    btn.classList.remove(
+                        "bg-green-600",
+                        "bg-[#E53935]",
+                        "bg-[#FDD835]",
+                        "bg-[#1976D2]",
+                        "bg-slate-500",
+                        "text-white",
+                        "text-black",
+                    );
+                    btn.classList.add("bg-gray-100", "text-gray-700");
+                    if (btn.dataset.collection === "all") {
+                        btn.classList.remove("bg-gray-100", "text-gray-700");
+                        btn.classList.add("bg-green-600", "text-white");
+                    }
+                });
+
+            // Resetear tema
+            currentCategory = "all";
+            categoryFilters.value = "all";
+
+            // Resetear orden
+            currentSort = "date";
+            document
+                .querySelectorAll("#sortAlpha, #sortDate")
+                .forEach((btn) => {
+                    btn.classList.remove("bg-green-600", "text-white");
+                    btn.classList.add("bg-gray-100", "text-gray-700");
+                });
+            sortDate.classList.remove("bg-gray-100", "text-gray-700");
+            sortDate.classList.add("bg-green-600", "text-white");
+
+            filterAndSort();
+        }
+
+        resetFilters.addEventListener("click", resetAllFiltersUI);
+
+        collectionFilters.addEventListener("click", (e) => {
+            if (e.target.tagName === "BUTTON") {
+                const collection = e.target.dataset.collection;
+
+                // Resetear todos los botones de colección al estado inactivo
+                document
+                    .querySelectorAll("#collectionFilters button")
+                    .forEach((btn) => {
+                        btn.classList.remove(
+                            "bg-green-600",
+                            "bg-[#E53935]",
+                            "bg-[#FDD835]",
+                            "bg-[#1976D2]",
+                            "bg-slate-500",
+                            "text-white",
+                            "text-black",
+                        );
+                        btn.classList.add("bg-gray-100", "text-gray-700");
+                    });
+
+                // Aplicar el color específico de la colección seleccionada
+                const activeColors =
+                    collectionColors[collection] || collectionColors["all"];
+                e.target.classList.remove("bg-gray-100", "text-gray-700");
+                e.target.classList.add(activeColors.bg, activeColors.text);
+
+                currentCollection = collection;
+                filterAndSort();
+            }
+        });
+
+        categoryFilters.addEventListener("change", (e) => {
+            currentCategory = e.target.value;
+            filterAndSort();
+        });
+
+        sortAlpha.addEventListener("click", () => {
+            document
+                .querySelectorAll("#sortAlpha, #sortDate")
+                .forEach((btn) => {
+                    btn.classList.remove("bg-green-600", "text-white");
+                    btn.classList.add("bg-gray-100", "text-gray-700");
+                });
+            sortAlpha.classList.remove("bg-gray-100", "text-gray-700");
+            sortAlpha.classList.add("bg-green-600", "text-white");
+            currentSort = "alpha";
+            filterAndSort();
+        });
+
+        sortDate.addEventListener("click", () => {
+            document
+                .querySelectorAll("#sortAlpha, #sortDate")
+                .forEach((btn) => {
+                    btn.classList.remove("bg-green-600", "text-white");
+                    btn.classList.add("bg-gray-100", "text-gray-700");
+                });
+            sortDate.classList.remove("bg-gray-100", "text-gray-700");
+            sortDate.classList.add("bg-green-600", "text-white");
+            currentSort = "date";
+            filterAndSort();
+        });
+
+        searchInput.addEventListener("input", (e) => {
+            searchQuery = e.target.value;
+            filterAndSort();
+        });
+
+        articles.forEach((card) => {
+            card.addEventListener("click", () => {
+                const id = card.dataset.id;
+                const book = allBooks.find((b) => b.id === id);
+                if (book && book.targetUrl) {
+                    window.open(book.targetUrl, "_blank");
+                }
+            });
+        });
+
+        filterAndSort();
+    </script>
+</section>
