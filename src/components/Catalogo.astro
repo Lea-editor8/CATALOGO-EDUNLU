@@ -16,7 +16,7 @@ const booksForJs = books.map((b: Book) => {
 });
 ---
 
-<section id="catalogo" class="min-h-screen flex flex-col bg-gray-50 pt-6">
+<section id="catalogo" class="min-h-screen flex flex-col bg-slate-200 pt-6">
     <div id="libraryMessage" class="max-w-7xl mx-auto px-4 py-2 w-full"></div>
 
     <div
@@ -34,7 +34,7 @@ const booksForJs = books.map((b: Book) => {
                     data-collection={book.collection}
                     data-categories={JSON.stringify(book.category)}
                 >
-                    <div class="aspect-[3/4] overflow-hidden bg-gray-100 flex items-center justify-center p-2">
+                    <div class="aspect-3/4 overflow-hidden bg-gray-100 flex items-center justify-center p-2">
                         <Image
                             src={
                                 images[
@@ -91,7 +91,7 @@ const booksForJs = books.map((b: Book) => {
         No se encontraron libros.
     </p>
 
-    <script type="module">
+    <script>
         const grid = document.getElementById("book-grid");
         const allBooks = JSON.parse(grid.dataset.books);
         const searchInput = document.getElementById("searchInput");
