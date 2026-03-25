@@ -19,6 +19,33 @@ const booksForJs = books.map((b: Book) => {
 <section id="catalogo" class="min-h-screen flex flex-col bg-slate-200 pt-6">
     <div id="libraryMessage" class="max-w-7xl mx-auto px-4 py-2 w-full"></div>
 
+    <!-- Mensaje cuando no hay resultados -->
+    <div
+        id="emptyLibraryMessage"
+        class="hidden flex-1 flex-col items-center justify-center p-20 text-gray-500"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-16 w-16 text-gray-300 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            ></path>
+        </svg>
+        <p class="text-xl font-semibold text-gray-600">
+            No se encontraron libros
+        </p>
+        <p class="text-sm mt-2">
+            Intentá con otros filtros o términos de búsqueda
+        </p>
+    </div>
+
     <div
         id="book-grid"
         data-books={JSON.stringify(booksForJs)}
@@ -86,34 +113,51 @@ const booksForJs = books.map((b: Book) => {
             ))
         }
     </div>
-
-    <p id="emptyLibraryMessage" class="text-center text-gray-500 hidden p-8">
-        No se encontraron libros.
-    </p>
-
     <script>
-        const grid = document.getElementById("book-grid");
-        const allBooks = JSON.parse(grid.dataset.books);
-        const searchInput = document.getElementById("searchInput");
-        const collectionFilters = document.getElementById("collectionFilters");
-        const categoryFilters = document.getElementById("categoryFilters");
-        const sortAlpha = document.getElementById("sortAlpha");
-        const sortDate = document.getElementById("sortDate");
-        const resetFilters = document.getElementById("resetFilters");
-        const emptyMessage = document.getElementById("emptyLibraryMessage");
+        import type { Book } from "@data/libros";
+
+        const grid = document.getElementById("book-grid") as HTMLElement;
+        const allBooks = JSON.parse(grid?.dataset?.books || "[]") as Book[];
+        const searchInput = document.getElementById(
+            "searchInput",
+        ) as HTMLInputElement | null;
+        const collectionFilters = document.getElementById(
+            "collectionFilters",
+        ) as HTMLElement | null;
+        const categoryFilters = document.getElementById(
+            "categoryFilters",
+        ) as HTMLSelectElement | null;
+        const sortAlpha = document.getElementById(
+            "sortAlpha",
+        ) as HTMLElement | null;
+        const sortDate = document.getElementById(
+            "sortDate",
+        ) as HTMLElement | null;
+        const resetFilters = document.getElementById(
+            "resetFilters",
+        ) as HTMLElement | null;
+        const emptyMessage = document.getElementById(
+            "emptyLibraryMessage",
+        ) as HTMLElement | null;
 
         let currentCollection = "all";
         let currentCategory = "all";
         let currentSort = "date";
         let searchQuery = "";
 
-        const articles = Array.from(grid.querySelectorAll("article"));
+        const articles = grid
+            ? Array.from(grid.querySelectorAll("article"))
+            : [];
 
-        sortAlpha.classList.add("bg-gray-100", "text-gray-700");
-        sortDate.classList.remove("bg-gray-100", "text-gray-700");
-        sortDate.classList.add("bg-green-600", "text-white");
+        if (sortAlpha && sortDate) {
+            sortAlpha.classList.add("bg-gray-100", "text-gray-700");
+            sortDate.classList.remove("bg-gray-100", "text-gray-700");
+            sortDate.classList.add("bg-green-600", "text-white");
+        }
 
         function filterAndSort() {
+            if (!grid || !emptyMessage) return;
+
             let filtered = [...allBooks];
 
             if (searchQuery) {
@@ -127,7 +171,7 @@ const booksForJs = books.map((b: Book) => {
 
             if (currentCollection !== "all") {
                 filtered = filtered.filter(
-                    (b) => b.collection === currentCollection,
+                    (b) => (b.collection || "") === currentCollection,
                 );
             }
 
@@ -141,7 +185,9 @@ const booksForJs = books.map((b: Book) => {
                 filtered.sort((a, b) => a.title.localeCompare(b.title));
             } else if (currentSort === "date") {
                 filtered.sort(
-                    (a, b) => new Date(b.publishDate) - new Date(a.publishDate),
+                    (a, b) =>
+                        new Date(b.publishDate).getTime() -
+                        new Date(a.publishDate).getTime(),
                 );
             }
 
@@ -151,26 +197,29 @@ const booksForJs = books.map((b: Book) => {
             filtered.forEach((book) => {
                 const article = articles.find((a) => a.dataset.id === book.id);
                 if (article) {
-                    grid.appendChild(article); // Al hacer appendChild de un nodo existente, se mueve de posición
+                    grid.appendChild(article);
                     article.style.display = "";
                 }
             });
 
             // Ocultar los que no están en el filtro
             articles.forEach((article) => {
-                if (!filteredIds.has(article.dataset.id)) {
+                const articleId = article.dataset.id;
+                if (articleId && !filteredIds.has(articleId)) {
                     article.style.display = "none";
                 }
             });
 
             if (filtered.length === 0) {
                 emptyMessage.classList.remove("hidden");
+                emptyMessage.classList.add("flex");
             } else {
                 emptyMessage.classList.add("hidden");
+                emptyMessage.classList.remove("flex");
             }
         }
 
-        const collectionColors = {
+        const collectionColors: Record<string, { bg: string; text: string }> = {
             Ciencias: { bg: "bg-[#E53935]", text: "text-white" },
             "Sociedad en movimiento": {
                 bg: "bg-[#FDD835]",
@@ -182,16 +231,15 @@ const booksForJs = books.map((b: Book) => {
         };
 
         function resetAllFiltersUI() {
-            // Resetear búsqueda
             searchQuery = "";
-            searchInput.value = "";
+            if (searchInput) searchInput.value = "";
 
-            // Resetear colección
             currentCollection = "all";
             document
                 .querySelectorAll("#collectionFilters button")
                 .forEach((btn) => {
-                    btn.classList.remove(
+                    const button = btn as HTMLElement;
+                    button.classList.remove(
                         "bg-green-600",
                         "bg-[#E53935]",
                         "bg-[#FDD835]",
@@ -200,42 +248,46 @@ const booksForJs = books.map((b: Book) => {
                         "text-white",
                         "text-black",
                     );
-                    btn.classList.add("bg-gray-100", "text-gray-700");
-                    if (btn.dataset.collection === "all") {
-                        btn.classList.remove("bg-gray-100", "text-gray-700");
-                        btn.classList.add("bg-green-600", "text-white");
+                    button.classList.add("bg-gray-100", "text-gray-700");
+                    if (button.dataset.collection === "all") {
+                        button.classList.remove("bg-gray-100", "text-gray-700");
+                        button.classList.add("bg-green-600", "text-white");
                     }
                 });
 
-            // Resetear tema
             currentCategory = "all";
-            categoryFilters.value = "all";
+            if (categoryFilters) categoryFilters.value = "all";
 
-            // Resetear orden
             currentSort = "date";
             document
                 .querySelectorAll("#sortAlpha, #sortDate")
                 .forEach((btn) => {
-                    btn.classList.remove("bg-green-600", "text-white");
-                    btn.classList.add("bg-gray-100", "text-gray-700");
+                    const button = btn as HTMLElement;
+                    button.classList.remove("bg-green-600", "text-white");
+                    button.classList.add("bg-gray-100", "text-gray-700");
                 });
-            sortDate.classList.remove("bg-gray-100", "text-gray-700");
-            sortDate.classList.add("bg-green-600", "text-white");
+
+            if (sortDate) {
+                sortDate.classList.remove("bg-gray-100", "text-gray-700");
+                sortDate.classList.add("bg-green-600", "text-white");
+            }
 
             filterAndSort();
         }
 
-        resetFilters.addEventListener("click", resetAllFiltersUI);
+        resetFilters?.addEventListener("click", resetAllFiltersUI);
 
-        collectionFilters.addEventListener("click", (e) => {
-            if (e.target.tagName === "BUTTON") {
-                const collection = e.target.dataset.collection;
+        collectionFilters?.addEventListener("click", (e) => {
+            const button = (e.target as HTMLElement).closest("button");
+            if (button && button.parentElement?.id === "collectionFilters") {
+                const collection =
+                    button.getAttribute("data-collection") ?? "all";
 
-                // Resetear todos los botones de colección al estado inactivo
                 document
                     .querySelectorAll("#collectionFilters button")
                     .forEach((btn) => {
-                        btn.classList.remove(
+                        const b = btn as HTMLElement;
+                        b.classList.remove(
                             "bg-green-600",
                             "bg-[#E53935]",
                             "bg-[#FDD835]",
@@ -244,53 +296,60 @@ const booksForJs = books.map((b: Book) => {
                             "text-white",
                             "text-black",
                         );
-                        btn.classList.add("bg-gray-100", "text-gray-700");
+                        b.classList.add("bg-gray-100", "text-gray-700");
                     });
 
-                // Aplicar el color específico de la colección seleccionada
                 const activeColors =
                     collectionColors[collection] || collectionColors["all"];
-                e.target.classList.remove("bg-gray-100", "text-gray-700");
-                e.target.classList.add(activeColors.bg, activeColors.text);
+                button.classList.remove("bg-gray-100", "text-gray-700");
+                button.classList.add(activeColors.bg, activeColors.text);
 
                 currentCollection = collection;
                 filterAndSort();
             }
         });
 
-        categoryFilters.addEventListener("change", (e) => {
-            currentCategory = e.target.value;
+        categoryFilters?.addEventListener("change", (e) => {
+            const target = e.target as HTMLSelectElement;
+            currentCategory = target.value;
             filterAndSort();
         });
 
-        sortAlpha.addEventListener("click", () => {
+        sortAlpha?.addEventListener("click", () => {
             document
                 .querySelectorAll("#sortAlpha, #sortDate")
                 .forEach((btn) => {
-                    btn.classList.remove("bg-green-600", "text-white");
-                    btn.classList.add("bg-gray-100", "text-gray-700");
+                    const button = btn as HTMLElement;
+                    button.classList.remove("bg-green-600", "text-white");
+                    button.classList.add("bg-gray-100", "text-gray-700");
                 });
-            sortAlpha.classList.remove("bg-gray-100", "text-gray-700");
-            sortAlpha.classList.add("bg-green-600", "text-white");
+            if (sortAlpha) {
+                sortAlpha.classList.remove("bg-gray-100", "text-gray-700");
+                sortAlpha.classList.add("bg-green-600", "text-white");
+            }
             currentSort = "alpha";
             filterAndSort();
         });
 
-        sortDate.addEventListener("click", () => {
+        sortDate?.addEventListener("click", () => {
             document
                 .querySelectorAll("#sortAlpha, #sortDate")
                 .forEach((btn) => {
-                    btn.classList.remove("bg-green-600", "text-white");
-                    btn.classList.add("bg-gray-100", "text-gray-700");
+                    const button = btn as HTMLElement;
+                    button.classList.remove("bg-green-600", "text-white");
+                    button.classList.add("bg-gray-100", "text-gray-700");
                 });
-            sortDate.classList.remove("bg-gray-100", "text-gray-700");
-            sortDate.classList.add("bg-green-600", "text-white");
+            if (sortDate) {
+                sortDate.classList.remove("bg-gray-100", "text-gray-700");
+                sortDate.classList.add("bg-green-600", "text-white");
+            }
             currentSort = "date";
             filterAndSort();
         });
 
-        searchInput.addEventListener("input", (e) => {
-            searchQuery = e.target.value;
+        searchInput?.addEventListener("input", (e) => {
+            const target = e.target as HTMLInputElement;
+            searchQuery = target.value;
             filterAndSort();
         });
 

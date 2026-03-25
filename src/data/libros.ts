@@ -1121,16 +1121,6 @@ export const books: Book[] = [
         publishDate: "2025-12-12",
     },
     {
-        id: "fray-manuel-y-los-gigantes-id",
-        title: "Fray Manuel y los gigantes",
-        author: "Mariángeles Arnaiz",
-        collection: "Sociedad en movimiento",
-        category: ["Literatura", "Narrativa"],
-        targetUrl: "https://www.edunlu.unlu.edu.ar/?q=node/342",
-        coverImage: "Fray manuel.gif",
-        publishDate: "2026-02-23",
-    },
-    {
         id: "serie-optimiza-libro-3-id",
         title: "Serie Optimiza. Libro 3. Modelos, simulación y teoría de la decisión",
         author: "Ing. Alejandro Roberti, Ing. Gustavo Chijani, Ing. Esteban Gidekel",
@@ -1139,6 +1129,16 @@ export const books: Book[] = [
         targetUrl: "https://www.edunlu.unlu.edu.ar/?q=node/341",
         coverImage: "optimiza-3.gif",
         publishDate: "2026-02-23",
+    },
+    {
+        id: "fray-manuel-y-los-gigantes",
+        title: "Fray Manuel y los gigantes",
+        author: "Mariángeles Arnaiz",
+        collection: "Sociedad en movimiento",
+        category: ["Literatura", "Narrativa", "Historia", "Sociedad"],
+        targetUrl: "https://www.edunlu.unlu.edu.ar/?q=node/342",
+        coverImage: "Fray manuel.gif",
+        publishDate: "2026-02-23"
     },
     {
         id: "lumpen-libertario-id",
@@ -1159,5 +1159,15 @@ export const books: Book[] = [
         targetUrl: "https://www.edunlu.unlu.edu.ar/?q=node/344",
         coverImage: "trabajo-hormiga-nuevo.gif",
         publishDate: "2026-03-09",
+    },
+    {
+        id: "grieta-visual",
+        title: "Grieta visual: civilización y barbarie. Un estudio de las imágenes de los libros de texto desde fines de S.XIX",
+        author: "Gabriela Cruder",
+        collection: "Ciencias",
+        category: ["Historia", "Educación", "Análisis Visual"],
+        targetUrl: "https://www.edunlu.unlu.edu.ar/?q=node/345",
+        coverImage: "grieta_visual.gif",
+        publishDate: "2026-03-13"
     },
 ];
