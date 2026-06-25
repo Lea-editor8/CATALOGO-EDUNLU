@@ -139,8 +139,21 @@ const booksForJs = books.map((b: Book) => {
         const emptyMessage = document.getElementById(
             "emptyLibraryMessage",
         ) as HTMLElement | null;
+        const filterToggle = document.getElementById(
+            "filterToggle",
+        ) as HTMLElement | null;
+        const filterPanel = document.getElementById(
+            "filterPanel",
+        ) as HTMLElement | null;
+        const filterBadge = document.getElementById(
+            "filterBadge",
+        ) as HTMLElement | null;
+        const filterChevron = document.getElementById(
+            "filterChevron",
+        ) as HTMLElement | null;
 
         let currentCollection = "all";
+        let currentSeries = "all";
         let currentCategory = "all";
         let currentSort = "date";
         let searchQuery = "";
@@ -172,6 +185,12 @@ const booksForJs = books.map((b: Book) => {
             if (currentCollection !== "all") {
                 filtered = filtered.filter(
                     (b) => (b.collection || "") === currentCollection,
+                );
+            }
+
+            if (currentSeries !== "all") {
+                filtered = filtered.filter(
+                    (b) => (b.series || "") === currentSeries,
                 );
             }
 
@@ -217,15 +236,18 @@ const booksForJs = books.map((b: Book) => {
                 emptyMessage.classList.add("hidden");
                 emptyMessage.classList.remove("flex");
             }
+
+            updateFilterBadge();
         }
 
         const collectionColors: Record<string, { bg: string; text: string }> = {
             Ciencias: { bg: "bg-[#E53935]", text: "text-white" },
-            "Sociedad en movimiento": {
+            "Sociedad en Movimiento": {
                 bg: "bg-[#FDD835]",
                 text: "text-black",
             },
-            Aulas: { bg: "bg-[#1976D2]", text: "text-white" },
+            "Serie Historias de Vida": { bg: "bg-lime-500", text: "text-white" },
+            "Aulas Universitarias": { bg: "bg-[#1976D2]", text: "text-white" },
             "": { bg: "bg-slate-500", text: "text-white" },
             all: { bg: "bg-green-600", text: "text-white" },
         };
@@ -235,6 +257,7 @@ const booksForJs = books.map((b: Book) => {
             if (searchInput) searchInput.value = "";
 
             currentCollection = "all";
+            currentSeries = "all";
             document
                 .querySelectorAll("#collectionFilters button")
                 .forEach((btn) => {
@@ -245,13 +268,22 @@ const booksForJs = books.map((b: Book) => {
                         "bg-[#FDD835]",
                         "bg-[#1976D2]",
                         "bg-slate-500",
+                        "bg-lime-500",
                         "text-white",
                         "text-black",
                     );
                     button.classList.add("bg-gray-100", "text-gray-700");
-                    if (button.dataset.collection === "all") {
-                        button.classList.remove("bg-gray-100", "text-gray-700");
-                        button.classList.add("bg-green-600", "text-white");
+                    if (
+                        button.dataset.collection === "all" ||
+                        button.dataset.series === "all"
+                    ) {
+                        if (button.dataset.collection === "all") {
+                            button.classList.remove(
+                                "bg-gray-100",
+                                "text-gray-700",
+                            );
+                            button.classList.add("bg-green-600", "text-white");
+                        }
                     }
                 });
 
@@ -273,15 +305,49 @@ const booksForJs = books.map((b: Book) => {
             }
 
             filterAndSort();
+            updateFilterBadge();
+        }
+
+        function updateFilterBadge() {
+            if (!filterBadge) return;
+            let count = 0;
+            if (currentCollection !== "all") count++;
+            if (currentSeries !== "all") count++;
+            if (currentCategory !== "all") count++;
+
+            if (count > 0) {
+                filterBadge.classList.remove("hidden");
+                filterBadge.textContent = String(count);
+            } else {
+                filterBadge.classList.add("hidden");
+                filterBadge.textContent = "0";
+            }
         }
 
         resetFilters?.addEventListener("click", resetAllFiltersUI);
 
+        filterToggle?.addEventListener("click", () => {
+            if (!filterPanel || !filterChevron) return;
+            const isHidden = filterPanel.classList.contains("hidden");
+            if (isHidden) {
+                filterPanel.classList.remove("hidden");
+                filterChevron.classList.add("rotate-180");
+            } else {
+                filterPanel.classList.add("hidden");
+                filterChevron.classList.remove("rotate-180");
+            }
+        });
+
         collectionFilters?.addEventListener("click", (e) => {
             const button = (e.target as HTMLElement).closest("button");
-            if (button && button.parentElement?.id === "collectionFilters") {
-                const collection =
-                    button.getAttribute("data-collection") ?? "all";
+            if (
+                button &&
+                (button.parentElement?.id === "collectionFilters" ||
+                    button.parentElement?.parentElement?.id ===
+                        "collectionFilters")
+            ) {
+                const collection = button.getAttribute("data-collection");
+                const series = button.getAttribute("data-series");
 
                 document
                     .querySelectorAll("#collectionFilters button")
@@ -293,18 +359,29 @@ const booksForJs = books.map((b: Book) => {
                             "bg-[#FDD835]",
                             "bg-[#1976D2]",
                             "bg-slate-500",
+                            "bg-lime-500",
                             "text-white",
                             "text-black",
                         );
                         b.classList.add("bg-gray-100", "text-gray-700");
                     });
 
-                const activeColors =
-                    collectionColors[collection] || collectionColors["all"];
-                button.classList.remove("bg-gray-100", "text-gray-700");
-                button.classList.add(activeColors.bg, activeColors.text);
+                if (series !== null) {
+                    const activeColors =
+                        collectionColors[series] || collectionColors["all"];
+                    button.classList.remove("bg-gray-100", "text-gray-700");
+                    button.classList.add(activeColors.bg, activeColors.text);
+                    currentSeries = series;
+                    currentCollection = "all";
+                } else if (collection !== null) {
+                    const activeColors =
+                        collectionColors[collection] || collectionColors["all"];
+                    button.classList.remove("bg-gray-100", "text-gray-700");
+                    button.classList.add(activeColors.bg, activeColors.text);
+                    currentCollection = collection;
+                    currentSeries = "all";
+                }
 
-                currentCollection = collection;
                 filterAndSort();
             }
         });

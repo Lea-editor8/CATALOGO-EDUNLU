@@ -6,7 +6,7 @@ Este proyecto es una aplicación web moderna diseñada para explorar y filtrar e
 
 - **Búsqueda Dinámica**: Encuentra libros rápidamente por título o autor mediante un sistema de búsqueda en tiempo real.
 - **Filtros Avanzados**:
-  - Filtro por **Colecciones** (Ciencias, Sociedad en movimiento, Aulas, etc.).
+  - Filtro por **Colecciones** (Ciencias, Sociedad en Movimiento, Aulas Universitarias, etc.).
   - Filtro por **Temas/Categorías**.
 - **Ordenamiento Flexible**: Organiza el catálogo alfabéticamente (A-Z) o por fecha de publicación.
 - **Interfaz Premium**: Diseño responsivo y fluido utilizando Tailwind CSS 4, con micro-animaciones y efectos hover para una mejor experiencia de usuario.
