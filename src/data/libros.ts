@@ -1233,7 +1233,7 @@ export const books: Book[] = [
         collection: "Ciencias",
         category: [ "Cuenca Hidrológica", "Ecología", "Medio Ambiente" ],
         targetUrl: "https://www.edunlu.unlu.edu.ar/?q=node/351",
-        coverImage: "cuenca-rio-lujan-naturaleza-y-poblacion.gif",
+        coverImage: "cuenca-rio-lujan-naturaleza-y-poblacion.jpg",
         publishDate: "2026-06-22"
     }
 ];
