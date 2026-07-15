@@ -33,8 +33,20 @@ function getCollectionStyle(collection: string): string {
 <LayoutCarrusel title="Carrusel | EdUNLu">
     <div class="carrusel-page min-h-screen flex flex-col">
         <header class="carrusel-header">
-            <h1>Carrusel</h1>
-            <p>Catálogo de publicaciones — EdUNLu</p>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 128 128"
+                class="header-logo"
+                role="img"
+                aria-label="Logo EdUNLu"
+            >
+                <g fill="#0DA353">
+                    <path
+                        d="M54.9 0 4.7 28.9v59.6L73.1 128l50.2-28.9L112.6 93l-39.3 22.7-25.1-14.4V79.9L29.5 90.6V43.3L72 18.7l18.4 10.7L48.2 54l24.9 14.4 50.2-28.9L54.9 0zM12.4 80.7V33.4L54.6 8.8l9.4 5.6L22 38.7V86l-9.6-5.3zM64 53.7l34.2-19.8 9.4 5.6L73.4 59.3 64 53.7z"
+                    />
+                    <polygon points="73.1 115.7 48.2 101.3 48.2 54 73.1 68.4" />
+                </g>
+            </svg>
         </header>
 
         <div class="swiper mySwiper">
@@ -89,17 +101,11 @@ function getCollectionStyle(collection: string): string {
         margin-bottom: 1.5rem;
     }
 
-    .carrusel-header h1 {
-        font-size: 2.25rem;
-        font-weight: 700;
-        margin: 0 0 0.25rem;
-        color: #059435;
-    }
-
-    .carrusel-header p {
-        font-size: 1rem;
-        color: #94a3b8;
-        margin: 0;
+    .header-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        display: block;
     }
 
     .swiper {
@@ -211,6 +217,13 @@ function getCollectionStyle(collection: string): string {
     .swiper-pagination-bullet-active {
         background: #22c55e;
         opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+        .swiper {
+            -webkit-mask-image: none;
+            mask-image: none;
+        }
     }
 </style>
 
